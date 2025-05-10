@@ -1,4 +1,5 @@
 import tkinter as tk
+import time
 
 class Point:
     def __init__(self, x=0, y=0):
@@ -86,34 +87,46 @@ class Cell:
             fill_color = 'gray'
         self.window.draw_line(Line(c1, c2), fill_color)
 
+class Maze:
+    def __init__(self, x1, y1, nrows, ncols, cell_size_x, cell_size_y, win):
+        self.x1 = x1
+        self.y1 = y1
+        self.nrows = nrows
+        self.ncols = ncols
+        self.cell_size_x = cell_size_x
+        self.cell_size_y = cell_size_y
+        self.win = win
+
+        self._create_cells()
+        
+    def _create_cells(self):
+        self.cells = []
+        for i in range(self.nrows):
+            row = [Cell(self.win) for j in range(self.ncols)]
+            self.cells.append(row)
+        for i in range(self.nrows):
+            for j in range(self.ncols):
+                self._draw_cell(i, j)
+
+    def _draw_cell(self, i, j):
+        x1 = self.x1 + i * self.cell_size_x
+        y1 = self.y1 + j * self.cell_size_y
+        x2 = x1 + self.cell_size_x
+        y2 = y1 - self.cell_size_y
+        cell = self.cells[i][j]
+        cell.draw(x1, y1, x2, y2)
+        self._animate()
+
+    def _animate(self):
+        if self.win is None:
+            return 
+        self.win.redraw()
+        time.sleep(0.05)
+
 
 def main():
     win = Window(800, 600)
-
-    c1 = Cell(win)
-    c1.has_right_wall = False
-    c1.draw(50, 50, 100, 100)
-
-    c2 = Cell(win)
-    c2.has_left_wall = False
-    c2.has_bottom_wall = False
-    c2.draw(100, 50, 150, 100)
-
-    c1.draw_move(c2)
-
-    c3 = Cell(win)
-    c3.has_top_wall = False
-    c3.has_right_wall = False
-    c3.draw(100, 100, 150, 150)
-
-    c2.draw_move(c3)
-
-    c4 = Cell(win)
-    c4.has_left_wall = False
-    c4.draw(150, 100, 200, 150)
-
-    c3.draw_move(c4, True)
-
+    maze = Maze(200,200, 8, 6, 50, 50, win)
     win.wait_for_close()
 
 main()
