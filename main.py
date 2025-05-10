@@ -101,11 +101,12 @@ class Maze:
         
     def _create_cells(self):
         self.cells = []
-        for i in range(self.nrows):
-            row = [Cell(self.win) for j in range(self.ncols)]
+        for i in range(self.ncols):
+            row = [Cell(self.win) for j in range(self.nrows)]
             self.cells.append(row)
-        for i in range(self.nrows):
-            for j in range(self.ncols):
+
+        for i in range(self.ncols):
+            for j in range(self.nrows):
                 self._draw_cell(i, j)
 
     def _draw_cell(self, i, j):
@@ -125,8 +126,6 @@ class Maze:
 
 
 def main():
-    win = Window(800, 600)
-    maze = Maze(200,200, 8, 6, 50, 50, win)
-    win.wait_for_close()
+    pass
 
 main()
