@@ -179,6 +179,11 @@ class Maze:
             if len(to_visit) == 0:
                 self._draw_cell(i, j)
 
+    def _reset_cells_visited(self):
+        for col in self.cells:
+            for cell in col:
+                cell.visited = False
+
 
 
 def main():
