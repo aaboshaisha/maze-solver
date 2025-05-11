@@ -187,13 +187,50 @@ class Maze:
             for cell in col:
                 cell.visited = False
 
+    def _wall_present(self, i1, j1, i2, j2):
+        src = self.cells[i1][j1]
+        dst = self.cells[i2][j2]
+    
+        if i1 == i2 and j1 < j2:  # Moving down
+            return src.has_bottom_wall or dst.has_top_wall
+        if i1 == i2 and j1 > j2:  # Moving up
+            return src.has_top_wall or dst.has_bottom_wall
+        if i1 < i2 and j1 == j2:  # Moving right
+            return src.has_right_wall or dst.has_left_wall
+        if i1 > i2 and j1 == j2:  # Moving left
+            return src.has_left_wall or dst.has_right_wall
+        
+        # Not adjacent
+        return True
 
+    
+    def solve(self):
+        return self._solve_r(0, 0)
+
+    def _solve_r(self, i, j):
+        self._animate()
+        self.cells[i][j].visited = True
+        if (i, j) == (self.ncols - 1, self.nrows - 1):
+            return True
+        
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        for di, dj in directions:
+            ni, nj = i + di, j + dj
+            if 0 <= ni < self.ncols and 0 <= nj < self.nrows:
+                if not self._wall_present(i, j, ni, nj) and not self.cells[ni][nj].visited:
+                    self.cells[i][j].draw_move(self.cells[ni][nj], undo=False)
+                    if self._solve_r(ni, nj):
+                        return True
+                    else:
+                        self.cells[i][j].draw_move(self.cells[ni][nj], undo=True)
+        return False
 
 def main():
     win = Window(800, 600)
-    ncols = 3
-    nrows = 4
-    m1 = Maze(200, 200, nrows, ncols, 50, 50, win)
+    ncols = 10
+    nrows = 12
+    m1 = Maze(200, 200, nrows, ncols, 20, 20, win)
+    m1.solve()
     win.wait_for_close()
 
 main()
