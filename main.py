@@ -70,11 +70,12 @@ class Cell:
         self.window.draw_line(Line(bl, br), colors[self.has_bottom_wall])
 
 
+
     def draw_move(self, to_cell, undo=False):
         def get_center_point(cell):
             x1, y1, x2, y2 = cell.x1, cell.y1, cell.x2, cell.y2
             cx = x1 + abs(x2 - x1)/2
-            cy = y2 + abs(y1 - y2)/2
+            cy = y1 + abs(y2 - y1)/2
             return Point(cx, cy)
 
         c1 = get_center_point(self)
@@ -84,6 +85,7 @@ class Cell:
         if undo:
             fill_color = 'gray'
         self.window.draw_line(Line(c1, c2), fill_color)
+
 
 class Maze:
     def __init__(self, x1, y1, nrows, ncols, cell_size_x, cell_size_y, win, seed=None):
