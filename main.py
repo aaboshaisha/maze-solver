@@ -1,5 +1,6 @@
 import tkinter as tk
 import time
+import random
 
 class Point:
     def __init__(self, x=0, y=0):
@@ -51,6 +52,7 @@ class Cell:
         self.has_bottom_wall = has_bottom_wall
         
         self.window = win # access window to draw itself
+        self.visited = False
 
     def draw(self, x1, y1, x2, y2):
         # x1, y1 top left corner, x2, y2 bot right
@@ -83,10 +85,8 @@ class Cell:
             fill_color = 'gray'
         self.window.draw_line(Line(c1, c2), fill_color)
 
-
-
 class Maze:
-    def __init__(self, x1, y1, nrows, ncols, cell_size_x, cell_size_y, win):
+    def __init__(self, x1, y1, nrows, ncols, cell_size_x, cell_size_y, win, seed=None):
         self.x1 = x1
         self.y1 = y1
         self.nrows = nrows
@@ -97,6 +97,11 @@ class Maze:
 
         self._create_cells()
         self._break_entrance_and_exit()
+        self._break_walls_r(0, 0)
+
+        if seed is not None:
+            random.seed(seed)
+
         
     def _create_cells(self):
         self.cells = []
@@ -129,9 +134,58 @@ class Maze:
         i, j = self.ncols - 1, self.nrows - 1
         self.cells[i][j].has_bottom_wall = False
         self._draw_cell(i, j)
+        
+
+    def _get_adjacent(self, i, j, maxc, maxr, cells):
+        potential_neighbors = [(i-1, j), (i+1, j), (i, j-1), (i, j+1)]    
+        valid = [(ni, nj) for ni, nj in potential_neighbors 
+                 if 0 <= ni < maxc and 0 <= nj < maxr and cells[ni][nj].visited == False]
+        return valid
+    
+    def _break_inbetween(self, i1, j1, i2, j2):
+        src = self.cells[i1][j1]
+        dst = self.cells[i2][j2]
+        
+        # If src is to the left of dst
+        if i1 < i2:
+            src.has_right_wall = False
+            dst.has_left_wall = False
+        # If src is to the right of dst
+        elif i1 > i2:
+            src.has_left_wall = False
+            dst.has_right_wall = False
+        # If src is above dst
+        elif j1 < j2:
+            src.has_bottom_wall = False
+            dst.has_top_wall = False
+        # If src is below dst
+        else:
+            src.has_top_wall = False
+            dst.has_bottom_wall = False
+
+        # redraw after walls removed
+        self._draw_cell(i1, j1)
+        self._draw_cell(i2, j2)
+        
+    
+    def _break_walls_r(self, i, j):
+        self.cells[i][j].visited = True
+        to_visit = self._get_adjacent(i, j, self.ncols, self.nrows, self.cells)
+        while to_visit != []:
+            ni, nj = random.choice(to_visit)
+            self._break_inbetween(i, j, ni, nj)
+            self._break_walls_r(ni, nj)
+            to_visit = self._get_adjacent(i, j, self.ncols, self.nrows, self.cells)
+            if len(to_visit) == 0:
+                self._draw_cell(i, j)
+
 
 
 def main():
-    pass
+    win = Window(800, 600)
+    ncols = 3
+    nrows = 4
+    m1 = Maze(200, 200, nrows, ncols, 50, 50, win)
+    win.wait_for_close()
 
 main()
